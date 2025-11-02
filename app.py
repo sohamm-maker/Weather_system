@@ -1202,6 +1202,7 @@ def graphs():
 
 # Continue with API endpoints (same as before)
 @app.route('/api/data', methods=['GET', 'POST'])
+
 def api_data():
     """GET: Return all weather readings / POST: Insert new reading"""
     if request.method == 'POST':
@@ -1214,8 +1215,10 @@ def api_data():
                 if field not in data:
                     return jsonify({'error': f'Missing required field: {field}'}), 400
 
+            # Use IST time for timestamp
             if 'timestamp' not in data:
-                data['timestamp'] = datetime.now().isoformat()
+                IST = timedelta(hours=5, minutes=30)
+                data['timestamp'] = (datetime.utcnow() + IST).isoformat()
 
             df = pd.DataFrame([data])
             conn = sqlite3.connect(DATABASE_PATH)
@@ -1227,6 +1230,7 @@ def api_data():
                 'message': 'Data inserted successfully',
                 'data': data
             }), 201
+
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
